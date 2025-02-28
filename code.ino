@@ -8,6 +8,10 @@
 #define WIFI_SSID "mySSID"
 #define WIFI_PASSWORD "myPassword"
 
+// DHT Sensor Configuration
+#define DHTPIN 14  
+#define DHTTYPE DHT11
+
 // MQTT Configuration
 #define MQTT_BROKER "broker.mqtt.com"
 #define MQTT_PORT 8883
@@ -15,8 +19,9 @@
 #define MQTT_PASS "password"
 #define MQTT_TOPIC "topic/subtopic"
 #define MQTT_SEND_INTERVAL_MS 60000
+unsigned long prevMillis = 0;
 
-// CA Certs
+// CA Certs (.crt)
 const char* ca_cert = R"EOF(
 -----BEGIN CERTIFICATE-----
 
@@ -25,6 +30,7 @@ SIGN YOUR CA CERTIFICATE HERE
 -----END CERTIFICATE-----
 )EOF";
 
+// PRIVATE KEY (.key)
 const char* client_key = R"EOF(
 -----BEGIN PRIVATE KEY-----
 
@@ -33,13 +39,7 @@ SIGN YOUR PRIVATE KEY HERE
 -----END PRIVATE KEY-----
 )EOF";
 
-// DHT Sensor Configuration
-#define DHTPIN 14  
-#define DHTTYPE DHT11
 DHT dht(DHTPIN, DHTTYPE);
-
-unsigned long prevMillis = 0;
-
 WiFiClientSecure espClient;
 PubSubClient client(espClient);
 
@@ -53,7 +53,6 @@ void setup() {
     Serial.print(".");
   }
   Serial.println(" Connected");
-
 
   espClient.setCACert(ca_cert);
   espClient.setCertificate(ca_cert);
@@ -94,6 +93,7 @@ void loop() {
     }
 
     StaticJsonDocument<200> jsonDoc;
+    
     char buffer[10];
     sprintf(buffer, "%0.1f", temp);
     jsonDoc["temperature"] = buffer;
